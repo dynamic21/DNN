@@ -165,6 +165,16 @@ public:
 			for (int c = 0; c < connections[p].size(); c++)
 				output[p] += pastOutput[connections[p][c]] * weights[p][c];
 
+			if (!(nonlinear(output[p]) >= 0))
+			{
+				cout << output[p] << endl;
+
+				for (int c = 0; c < connections[p].size(); c++)
+				{
+					cout << pastOutput[connections[p][c]] << endl;
+					cout << weights[p][c] << endl;
+				}
+			}
 			output[p] = nonlinear(output[p]);
 		}
 	}
@@ -234,34 +244,33 @@ public:
 
 	void deleteNode()
 	{
-		vector<vector<int>> reverseConnections;
-		getReverseStructure(&reverseConnections);
-
-		int node = doubleRand() * (bias.size() - numInputs - numOutputs) + numInputs + numOutputs;
-		empty[node] = true;
-
-
-		cout << node << endl;
-
-
-		for (int c = 0; c < reverseConnections[node].size(); c++)
+		if (bias.size() > numInputs + numOutputs)
 		{
-			int node1 = reverseConnections[node][c];
-			vector<int>::iterator findNode2 = find(connections[node1].begin(), connections[node1].end(), node);
-			int connection = distance(connections[node1].begin(), findNode2);
+			vector<vector<int>> reverseConnections;
+			getReverseStructure(&reverseConnections);
 
-			connections[node1].erase(connections[node1].begin() + connection);
-			weights[node1].erase(weights[node1].begin() + connection);
+			int node = doubleRand() * (bias.size() - numInputs - numOutputs) + numInputs + numOutputs;
+			empty[node] = true;
 
-			for (int p = 0; p < connections[node].size(); p++)
+			for (int c = 0; c < reverseConnections[node].size(); c++)
 			{
-				int node2 = connections[node][p];
-				vector<int>::iterator findNode2 = find(connections[node1].begin(), connections[node1].end(), node2);
+				int node1 = reverseConnections[node][c];
+				vector<int>::iterator findNode2 = find(connections[node1].begin(), connections[node1].end(), node);
+				int connection = distance(connections[node1].begin(), findNode2);
 
-				if (findNode2 == connections[node1].end())
+				connections[node1].erase(connections[node1].begin() + connection);
+				weights[node1].erase(weights[node1].begin() + connection);
+
+				for (int p = 0; p < connections[node].size(); p++)
 				{
-					connections[node1].push_back(node2);
-					weights[node1].push_back(1);
+					int node2 = connections[node][p];
+					vector<int>::iterator findNode2 = find(connections[node1].begin(), connections[node1].end(), node2);
+
+					if (findNode2 == connections[node1].end())
+					{
+						connections[node1].push_back(node2);
+						weights[node1].push_back(1);
+					}
 				}
 			}
 		}
@@ -321,16 +330,13 @@ int main()
 		agents[i] = DNN();
 	}
 
-
-	int play = 2;
-
-
-	while (play--)
+	while (true)
 	{
 		for (int i = 0; i < numDNN; i++)
 		{
 			score[i] = 0;
 			empty[i] = false;
+			agents[i].resetMemory();
 		}
 
 		for (int i = 0; i < 100; i++)
