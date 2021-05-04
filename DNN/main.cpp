@@ -240,7 +240,9 @@ public:
 		int node = doubleRand() * (bias.size() - numInputs - numOutputs) + numInputs + numOutputs;
 		empty[node] = true;
 
+
 		cout << node << endl;
+
 
 		for (int c = 0; c < reverseConnections[node].size(); c++)
 		{
@@ -319,7 +321,9 @@ int main()
 		agents[i] = DNN();
 	}
 
+
 	int play = 2;
+
 
 	while (play--)
 	{
